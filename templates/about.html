@@ -1,0 +1,39 @@
+{% extends "base_public.html" %}
+{% block title %}About{% endblock %}
+{% block content %}
+<div class="about-hero">
+  <div>
+    <h1>About <span style="color:var(--accent-cyan);">SecureWatch</span></h1>
+    <p>A portfolio-grade cybersecurity monitoring platform built to demonstrate real-world SOC engineering skills.</p>
+  </div>
+</div>
+<div class="about-section">
+  <h2>What is SecureWatch?</h2>
+  <p>SecureWatch is a lightweight Security Information and Event Management (SIEM) dashboard designed to monitor Linux authentication logs, detect intrusion attempts, and provide actionable threat intelligence to security analysts.</p>
+  <p>The project was built to showcase practical cybersecurity engineering — from log parsing and anomaly detection to interactive data visualization and role-based access control.</p>
+
+  <h2 style="margin-top:2.5rem;">Core Capabilities</h2>
+  <p>The platform parses <code>/var/log/auth.log</code> (and simulated equivalents) to extract SSH failed logins, brute-force patterns, and suspicious IP activity. Every event is stored in a SQLite database and surfaced through a modern dark-themed dashboard.</p>
+  <p>Threat detection logic assigns severity scores (Low → Critical) based on frequency and behavioral patterns, and automatically generates alerts for security analysts to investigate and resolve.</p>
+
+  <h2 style="margin-top:2.5rem;">Tech Stack</h2>
+  <div class="tech-chips">
+    <span class="tech-chip">Python 3</span>
+    <span class="tech-chip">Flask 3</span>
+    <span class="tech-chip">SQLite</span>
+    <span class="tech-chip">SQLAlchemy</span>
+    <span class="tech-chip">Chart.js</span>
+    <span class="tech-chip">HTML5 / CSS3</span>
+    <span class="tech-chip">JavaScript</span>
+    <span class="tech-chip">Werkzeug</span>
+    <span class="tech-chip">Flask-WTF (CSRF)</span>
+  </div>
+
+  <h2 style="margin-top:2.5rem;">Security Features</h2>
+  <p>All passwords are hashed using PBKDF2-SHA256 via Werkzeug. Sessions are signed with a server-side secret. CSRF tokens protect every form. SQL injection is prevented by SQLAlchemy's parameterized queries. Input validation is enforced on all user-facing fields.</p>
+
+  <div style="margin-top:3rem;text-align:center;">
+    <a href="{{ url_for('login') }}" class="btn-primary-hero">Launch Dashboard →</a>
+  </div>
+</div>
+{% endblock %}

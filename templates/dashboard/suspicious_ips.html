@@ -1,0 +1,105 @@
+{% extends "base_dashboard.html" %}
+{% set active_alerts_count = 0 %}
+{% block title %}Suspicious IPs{% endblock %}
+{% block page_title %}Suspicious IP Tracker{% endblock %}
+{% block breadcrumb %}Suspicious IPs{% endblock %}
+
+{% block body %}
+
+<div class="page-header">
+  <h1>Suspicious IP Tracker</h1>
+  <p>Monitor, score, and block IP addresses with suspicious behavior.</p>
+</div>
+
+<!-- Filters -->
+<form method="GET" class="filter-bar">
+  <input type="text" name="q" class="filter-input" placeholder="Search by IP address…" value="{{ search }}">
+  <button type="submit" class="btn-sw btn-sw-primary">Search</button>
+  {% if search %}<a href="{{ url_for('suspicious_ips') }}" class="btn-sw btn-sw-ghost">✕ Clear</a>{% endif %}
+  <span class="text-muted-sm" style="margin-left:auto;">{{ ips.total }} IP(s) tracked</span>
+</form>
+
+<div class="panel">
+  <div class="panel-header"><h2>IP Intelligence</h2></div>
+  <div class="sw-table-wrap">
+    <table class="sw-table">
+      <thead>
+        <tr>
+          <th>IP Address</th>
+          <th>Country</th>
+          <th>Failed Attempts</th>
+          <th>Threat Score</th>
+          <th>First Seen</th>
+          <th>Last Seen</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ip in ips.items %}
+        {% set score = ip.threat_score %}
+        {% set score_class = 'ts-critical' if score >= 80 else ('ts-high' if score >= 60 else ('ts-medium' if score >= 40 else 'ts-low')) %}
+        <tr>
+          <td><span class="ip-pill">{{ ip.ip_address }}</span></td>
+          <td style="color:var(--text-secondary);">{{ ip.country }}</td>
+          <td class="primary" style="text-align:center;">{{ ip.failed_attempts }}</td>
+          <td>
+            <div class="threat-bar-wrap">
+              <div class="threat-bar">
+                <div class="threat-bar-fill" data-score="{{ score }}"></div>
+              </div>
+              <span class="threat-score-num {{ score_class }}">{{ score }}</span>
+            </div>
+          </td>
+          <td class="mono">{{ ip.first_seen.strftime('%Y-%m-%d') }}</td>
+          <td class="mono">{{ ip.last_seen.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td>
+            {% if ip.is_blocked %}
+              <span class="badge-blocked">Blocked</span>
+            {% else %}
+              <span class="badge-clear">Clear</span>
+            {% endif %}
+          </td>
+          <td>
+            <form method="POST" action="{{ url_for('block_ip', ip_id=ip.id) }}" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              {% if ip.is_blocked %}
+                <button type="submit" class="btn-sw btn-sw-ghost" style="padding:0.3rem 0.75rem;">Unblock</button>
+              {% else %}
+                <button type="submit" class="btn-sw btn-sw-danger" style="padding:0.3rem 0.75rem;">Block</button>
+              {% endif %}
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--text-muted);">No suspicious IPs tracked</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Pagination -->
+{% if ips.pages > 1 %}
+<div class="pagination-bar">
+  {% if ips.has_prev %}
+    <a href="?page={{ ips.prev_num }}&q={{ search }}" class="page-btn">‹ Prev</a>
+  {% else %}
+    <span class="page-btn disabled">‹ Prev</span>
+  {% endif %}
+  {% for p in ips.iter_pages() %}
+    {% if p %}
+      <a href="?page={{ p }}&q={{ search }}" class="page-btn {% if p == ips.page %}active{% endif %}">{{ p }}</a>
+    {% else %}
+      <span class="page-btn">…</span>
+    {% endif %}
+  {% endfor %}
+  {% if ips.has_next %}
+    <a href="?page={{ ips.next_num }}&q={{ search }}" class="page-btn">Next ›</a>
+  {% else %}
+    <span class="page-btn disabled">Next ›</span>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

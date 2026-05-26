@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — SecureWatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="shield">🛡️</div>
+      <h1>SecureWatch</h1>
+      <p>Sign in to access the security dashboard</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-msg flash-{{ category }}" style="margin-bottom:1rem;">
+            {% if category == 'success' %}✓{% elif category == 'danger' %}✕{% else %}ℹ{% endif %}
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('login') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group">
+        <label class="form-label" for="username">Username</label>
+        <input class="form-control-dark" type="text" id="username" name="username"
+               placeholder="Enter your username" required autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-control-dark" type="password" id="password" name="password"
+               placeholder="Enter your password" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn-login-submit">Sign In →</button>
+    </form>
+
+    <div class="demo-creds">
+      <h4>Demo Credentials</h4>
+      <p>
+        Admin: &nbsp;<span>admin</span> / <span>Admin@1234</span><br>
+        Analyst: <span>analyst</span> / <span>Analyst@1234</span>
+      </p>
+    </div>
+
+    <p style="text-align:center;margin-top:1.5rem;font-size:0.8rem;color:var(--text-muted);">
+      <a href="{{ url_for('index') }}" style="color:var(--text-muted);">← Back to home</a>
+    </p>
+  </div>
+</div>
+<script>
+  document.querySelectorAll('.flash-msg').forEach(el => {
+    setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity 0.5s'; setTimeout(()=>el.remove(),500); }, 4000);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+{% extends "base_public.html" %}
+{% block title %}SecureWatch{% endblock %}
+{% block content %}
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Real-Time Security Monitoring
+    </div>
+    <h1>
+      Defend Your Linux Servers<br>
+      with <span class="highlight">SecureWatch</span>
+    </h1>
+    <p>
+      A lightweight SOC dashboard that monitors authentication logs, detects brute-force attacks,
+      tracks suspicious IPs, and visualizes threats — all in real time.
+    </p>
+    <div class="hero-actions">
+      <a href="{{ url_for('login') }}" class="btn-primary-hero">→ Launch Dashboard</a>
+      <a href="{{ url_for('about') }}" class="btn-secondary-hero">Learn More</a>
+    </div>
+  </div>
+</section>
+
+<!-- Stats strip -->
+<div class="stats-strip">
+  <div class="stats-strip-inner">
+    <div class="stat-item"><span class="num">300+</span><span class="label">Events Tracked</span></div>
+    <div class="stat-item"><span class="num">12</span><span class="label">IPs Monitored</span></div>
+    <div class="stat-item"><span class="num">99.9%</span><span class="label">Uptime</span></div>
+    <div class="stat-item"><span class="num">&lt;1s</span><span class="label">Alert Latency</span></div>
+  </div>
+</div>
+
+<!-- Features -->
+<section class="features">
+  <div class="section-header">
+    <h2>Everything a SOC Analyst Needs</h2>
+    <p>From log ingestion to threat detection and visual analytics — all in one platform.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(37,99,235,0.12);color:#60a5fa;">🔍</div>
+      <h3>Real-Time Log Analysis</h3>
+      <p>Parse <code>/var/log/auth.log</code> and detect authentication events as they happen. Supports SSH, sudo, and PAM events.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(239,68,68,0.12);color:#f87171;">🚨</div>
+      <h3>Brute-Force Detection</h3>
+      <p>Automatically identifies IP addresses with repeated failed login attempts and triggers tiered threat alerts.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(245,158,11,0.12);color:#fbbf24;">⚡</div>
+      <h3>Threat Intelligence</h3>
+      <p>Score and rank suspicious IPs by threat level. Block them directly from the dashboard with one click.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(16,185,129,0.12);color:#34d399;">📊</div>
+      <h3>Security Analytics</h3>
+      <p>Interactive Chart.js visualizations showing failed login trends, severity distribution, and top attacking IPs.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(139,92,246,0.12);color:#a78bfa;">📄</div>
+      <h3>Report Export</h3>
+      <p>Download security events and threat alerts as CSV files for compliance, auditing, or incident response.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(6,182,212,0.12);color:#67e8f9;">🔐</div>
+      <h3>Role-Based Access</h3>
+      <p>Admin and analyst roles with session management, password hashing (PBKDF2), and CSRF protection.</p>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

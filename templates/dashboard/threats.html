@@ -1,0 +1,107 @@
+{% extends "base_dashboard.html" %}
+{% set active_alerts_count = alerts.total if not alerts.query_string else 0 %}
+{% block title %}Threat Alerts{% endblock %}
+{% block page_title %}Threat Alerts{% endblock %}
+{% block breadcrumb %}Threat Alerts{% endblock %}
+
+{% block body %}
+
+<div class="page-header">
+  <h1>Threat Alerts</h1>
+  <p>Review, investigate, and resolve detected security threats.</p>
+</div>
+
+<!-- Filters -->
+<form method="GET" class="filter-bar">
+  <select name="severity" class="filter-select" onchange="this.form.submit()">
+    <option value="" {% if not severity %}selected{% endif %}>All Severities</option>
+    <option value="critical" {% if severity=='critical' %}selected{% endif %}>Critical</option>
+    <option value="high" {% if severity=='high' %}selected{% endif %}>High</option>
+    <option value="medium" {% if severity=='medium' %}selected{% endif %}>Medium</option>
+    <option value="low" {% if severity=='low' %}selected{% endif %}>Low</option>
+  </select>
+  <select name="resolved" class="filter-select" onchange="this.form.submit()">
+    <option value="" {% if resolved=='' %}selected{% endif %}>All Status</option>
+    <option value="0" {% if resolved=='0' %}selected{% endif %}>Open</option>
+    <option value="1" {% if resolved=='1' %}selected{% endif %}>Resolved</option>
+  </select>
+  <span class="text-muted-sm" style="margin-left:auto;">{{ alerts.total }} alert(s) found</span>
+</form>
+
+<div class="panel">
+  <div class="panel-header">
+    <h2>Alert List</h2>
+  </div>
+  <div class="sw-table-wrap">
+    <table class="sw-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Type</th>
+          <th>Source IP</th>
+          <th>Severity</th>
+          <th>Status</th>
+          <th>Triggered</th>
+          <th>Description</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for alert in alerts.items %}
+        <tr>
+          <td class="mono">{{ alert.id }}</td>
+          <td class="primary">{{ alert.alert_type }}</td>
+          <td><span class="ip-pill">{{ alert.source_ip or '—' }}</span></td>
+          <td><span class="badge-sev sev-{{ alert.severity }}">{{ alert.severity }}</span></td>
+          <td>
+            {% if alert.is_resolved %}
+              <span class="badge-resolved">Resolved</span>
+            {% else %}
+              <span class="badge-open">Open</span>
+            {% endif %}
+          </td>
+          <td class="mono">{{ alert.triggered_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td style="max-width:280px;color:var(--text-secondary);">{{ alert.description[:80] }}{% if alert.description|length > 80 %}…{% endif %}</td>
+          <td>
+            {% if not alert.is_resolved %}
+            <form method="POST" action="{{ url_for('resolve_alert', alert_id=alert.id) }}" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn-sw btn-sw-success" style="padding:0.3rem 0.75rem;">✓ Resolve</button>
+            </form>
+            {% else %}
+            <span class="text-muted-sm">{{ alert.resolved_at.strftime('%m/%d %H:%M') if alert.resolved_at else '—' }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--text-muted);">No alerts found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Pagination -->
+{% if alerts.pages > 1 %}
+<div class="pagination-bar">
+  {% if alerts.has_prev %}
+    <a href="?page={{ alerts.prev_num }}&severity={{ severity }}&resolved={{ resolved }}" class="page-btn">‹ Prev</a>
+  {% else %}
+    <span class="page-btn disabled">‹ Prev</span>
+  {% endif %}
+  {% for p in alerts.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+    {% if p %}
+      <a href="?page={{ p }}&severity={{ severity }}&resolved={{ resolved }}" class="page-btn {% if p == alerts.page %}active{% endif %}">{{ p }}</a>
+    {% else %}
+      <span class="page-btn">…</span>
+    {% endif %}
+  {% endfor %}
+  {% if alerts.has_next %}
+    <a href="?page={{ alerts.next_num }}&severity={{ severity }}&resolved={{ resolved }}" class="page-btn">Next ›</a>
+  {% else %}
+    <span class="page-btn disabled">Next ›</span>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

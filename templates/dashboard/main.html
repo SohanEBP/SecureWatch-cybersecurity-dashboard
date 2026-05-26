@@ -1,0 +1,164 @@
+{% extends "base_dashboard.html" %}
+{% set active_alerts_count = active_alerts %}
+{% block title %}Overview{% endblock %}
+{% block page_title %}Security Overview{% endblock %}
+{% block breadcrumb %}Overview{% endblock %}
+
+{% block body %}
+
+<!-- Stat Tiles -->
+<div class="stat-grid">
+  <div class="stat-tile tile-blue">
+    <span class="tile-label">Total Login Attempts</span>
+    <span class="tile-value" id="live-total">{{ total_attempts }}</span>
+    <span class="tile-sub">All time</span>
+    <span class="tile-icon">↔</span>
+  </div>
+  <div class="stat-tile tile-red">
+    <span class="tile-label">Failed Logins</span>
+    <span class="tile-value" id="live-failed">{{ failed_attempts }}</span>
+    <span class="tile-sub">Authentication failures</span>
+    <span class="tile-icon">✕</span>
+  </div>
+  <div class="stat-tile tile-green">
+    <span class="tile-label">Successful Logins</span>
+    <span class="tile-value" id="live-success">{{ success_attempts }}</span>
+    <span class="tile-sub">Authenticated sessions</span>
+    <span class="tile-icon">✓</span>
+  </div>
+  <div class="stat-tile tile-orange">
+    <span class="tile-label">Active Alerts</span>
+    <span class="tile-value" id="live-alerts">{{ active_alerts }}</span>
+    <span class="tile-sub">Unresolved threats</span>
+    <span class="tile-icon">⚠</span>
+  </div>
+  <div class="stat-tile tile-purple">
+    <span class="tile-label">Suspicious IPs</span>
+    <span class="tile-value">{{ suspicious_ips }}</span>
+    <span class="tile-sub">Flagged sources</span>
+    <span class="tile-icon">⊙</span>
+  </div>
+  <div class="stat-tile tile-red">
+    <span class="tile-label">Critical Alerts</span>
+    <span class="tile-value">{{ critical_alerts }}</span>
+    <span class="tile-sub">Require immediate action</span>
+    <span class="tile-icon">☢</span>
+  </div>
+</div>
+
+<!-- Charts row -->
+<div class="grid-2">
+  <div class="panel">
+    <div class="panel-header">
+      <h2>Login Activity — Last 7 Days</h2>
+      <span class="text-muted-sm">Updated live</span>
+    </div>
+    <div class="panel-body">
+      <div class="chart-wrap"><canvas id="loginChart"></canvas></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-header">
+      <h2>Threat Severity Distribution</h2>
+      <a href="{{ url_for('threats') }}" class="btn-sw btn-sw-ghost" style="font-size:0.75rem;">View All →</a>
+    </div>
+    <div class="panel-body">
+      <div class="chart-wrap"><canvas id="severityChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom row -->
+<div class="grid-2">
+  <!-- Recent Events -->
+  <div class="panel">
+    <div class="panel-header">
+      <h2>Recent Security Events</h2>
+      <a href="{{ url_for('login_activity') }}" class="btn-sw btn-sw-ghost" style="font-size:0.75rem;">All Activity →</a>
+    </div>
+    <div class="panel-body" style="padding:0;">
+      <div class="sw-table-wrap">
+        <table class="sw-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Source IP</th>
+              <th>User</th>
+              <th>Severity</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ev in recent_events %}
+            <tr>
+              <td class="mono">{{ ev.timestamp.strftime('%H:%M:%S') }}</td>
+              <td><span class="ip-pill">{{ ev.source_ip }}</span></td>
+              <td class="primary">{{ ev.username or '—' }}</td>
+              <td><span class="badge-sev sev-{{ ev.severity }}">{{ ev.severity }}</span></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:2rem;">No events yet</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Alerts + Top IPs -->
+  <div style="display:flex;flex-direction:column;gap:1.25rem;">
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Active Threat Alerts</h2>
+        <a href="{{ url_for('threats') }}" class="btn-sw btn-sw-ghost" style="font-size:0.75rem;">Manage →</a>
+      </div>
+      <div class="panel-body">
+        <div class="alert-feed">
+          {% for alert in recent_alerts %}
+          <div class="alert-item">
+            <div class="alert-dot dot-{{ alert.severity }}"></div>
+            <div class="alert-info">
+              <div class="alert-title">{{ alert.alert_type }}</div>
+              <div class="alert-desc">{{ alert.description[:70] }}{% if alert.description|length > 70 %}…{% endif %}</div>
+            </div>
+            <div class="alert-time">{{ alert.triggered_at.strftime('%m/%d %H:%M') }}</div>
+          </div>
+          {% else %}
+          <div class="empty-state"><div class="icon">✓</div><p>No active alerts</p></div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Top Threat Sources</h2>
+        <a href="{{ url_for('suspicious_ips') }}" class="btn-sw btn-sw-ghost" style="font-size:0.75rem;">View All →</a>
+      </div>
+      <div class="panel-body" style="padding:0.75rem 1.4rem;">
+        {% for ip in top_ips %}
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+          <span class="ip-pill" style="flex:1;min-width:0;">{{ ip.ip_address }}</span>
+          <div class="threat-bar-wrap" style="flex:1;">
+            <div class="threat-bar">
+              <div class="threat-bar-fill" data-score="{{ ip.threat_score }}"></div>
+            </div>
+            <span class="threat-score-num">{{ ip.threat_score }}</span>
+          </div>
+          <span style="font-size:0.72rem;color:var(--text-muted);min-width:28px;text-align:right;">{{ ip.failed_attempts }}f</span>
+        </div>
+        {% else %}
+        <div class="empty-state"><p>No suspicious IPs yet</p></div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  buildLoginChart({{ chart_labels|safe }}, {{ chart_failed|safe }}, {{ chart_success|safe }});
+  buildSeverityChart({{ severity_counts|safe }});
+</script>
+{% endblock %}

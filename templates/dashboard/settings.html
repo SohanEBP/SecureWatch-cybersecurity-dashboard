@@ -1,0 +1,117 @@
+{% extends "base_dashboard.html" %}
+{% set active_alerts_count = 0 %}
+{% block title %}Settings{% endblock %}
+{% block page_title %}Settings{% endblock %}
+{% block breadcrumb %}Settings{% endblock %}
+
+{% block body %}
+
+<div class="page-header">
+  <h1>Settings</h1>
+  <p>Manage your account, parse logs, and configure the monitoring system.</p>
+</div>
+
+<div class="grid-2">
+
+  <!-- Profile -->
+  <div>
+    <div class="settings-card">
+      <h3>Account Profile</h3>
+      <p class="desc">Your account information and access level.</p>
+      <div class="form-field">
+        <label>Username</label>
+        <input type="text" value="{{ user.username }}" disabled style="opacity:0.6;">
+      </div>
+      <div class="form-field">
+        <label>Email</label>
+        <input type="text" value="{{ user.email }}" disabled style="opacity:0.6;">
+      </div>
+      <div class="form-field">
+        <label>Role</label>
+        <input type="text" value="{{ user.role | capitalize }}" disabled style="opacity:0.6;">
+      </div>
+      <div class="form-field">
+        <label>Last Login</label>
+        <input type="text" value="{{ user.last_login.strftime('%Y-%m-%d %H:%M UTC') if user.last_login else 'First session' }}" disabled style="opacity:0.6;">
+      </div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="settings-card">
+      <h3>Change Password</h3>
+      <p class="desc">Passwords must be at least 8 characters.</p>
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="change_password">
+        <div class="form-field">
+          <label>Current Password</label>
+          <input type="password" name="current_password" placeholder="Current password" required>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>New Password</label>
+            <input type="password" name="new_password" placeholder="New password" required>
+          </div>
+          <div class="form-field">
+            <label>Confirm Password</label>
+            <input type="password" name="confirm_password" placeholder="Confirm password" required>
+          </div>
+        </div>
+        <button type="submit" class="btn-sw btn-sw-primary">Update Password</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Log Management -->
+  <div>
+    <div class="settings-card">
+      <h3>Parse Log File</h3>
+      <p class="desc">Point SecureWatch at a real <code>/var/log/auth.log</code> or a custom log path to ingest events.</p>
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="parse_logs">
+        <div class="form-field">
+          <label>Log File Path</label>
+          <input type="text" name="log_path" placeholder="/var/log/auth.log" value="/var/log/auth.log">
+        </div>
+        <button type="submit" class="btn-sw btn-sw-primary">Parse & Import</button>
+      </form>
+    </div>
+
+    <div class="settings-card">
+      <h3>Generate Sample Data</h3>
+      <p class="desc">Populate the database with realistic simulated attack scenarios for testing and demos.</p>
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="generate_sample">
+        <button type="submit" class="btn-sw btn-sw-success">Generate Sample Data</button>
+      </form>
+    </div>
+
+    {% if session.role == 'admin' %}
+    <div class="settings-card" style="border-color:rgba(239,68,68,0.3);">
+      <h3 style="color:var(--accent-red);">Danger Zone</h3>
+      <p class="desc">Permanently clear all security data from the database. This cannot be undone.</p>
+      <form method="POST" onsubmit="return confirm('Are you sure? This will delete ALL security data.');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="clear_data">
+        <button type="submit" class="btn-sw btn-sw-danger">Clear All Security Data</button>
+      </form>
+    </div>
+    {% endif %}
+
+    <div class="settings-card">
+      <h3>System Information</h3>
+      <p class="desc">Current platform details.</p>
+      <div style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-secondary);line-height:2;">
+        <div>Platform: <span style="color:var(--accent-cyan);">Python / Flask 3</span></div>
+        <div>Database: <span style="color:var(--accent-cyan);">SQLite (local)</span></div>
+        <div>Auth: <span style="color:var(--accent-cyan);">PBKDF2-SHA256</span></div>
+        <div>CSRF: <span style="color:var(--accent-green);">Enabled</span></div>
+        <div>Version: <span style="color:var(--accent-cyan);">1.0.0</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

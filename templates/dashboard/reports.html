@@ -1,0 +1,79 @@
+{% extends "base_dashboard.html" %}
+{% set active_alerts_count = 0 %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}Reports & Exports{% endblock %}
+{% block breadcrumb %}Reports{% endblock %}
+
+{% block body %}
+
+<div class="page-header">
+  <h1>Reports & Exports</h1>
+  <p>Download security data as CSV for compliance, auditing, and incident response.</p>
+</div>
+
+<!-- Summary Stats -->
+<div class="stat-grid" style="margin-bottom:2rem;">
+  <div class="stat-tile tile-blue">
+    <span class="tile-label">Total Events</span>
+    <span class="tile-value">{{ total_events }}</span>
+    <span class="tile-sub">Security events logged</span>
+  </div>
+  <div class="stat-tile tile-orange">
+    <span class="tile-label">Total Alerts</span>
+    <span class="tile-value">{{ total_alerts }}</span>
+    <span class="tile-sub">Threats generated</span>
+  </div>
+  <div class="stat-tile tile-red">
+    <span class="tile-label">Unresolved Alerts</span>
+    <span class="tile-value">{{ unresolved_alerts }}</span>
+    <span class="tile-sub">Require attention</span>
+  </div>
+  <div class="stat-tile tile-purple">
+    <span class="tile-label">Tracked IPs</span>
+    <span class="tile-value">{{ total_ips }}</span>
+    <span class="tile-sub">{{ blocked_ips }} blocked</span>
+  </div>
+</div>
+
+<div class="reports-grid">
+  <div class="report-card">
+    <div class="report-icon">📊</div>
+    <h3>Security Events CSV</h3>
+    <p>Export all security events including failed logins, source IPs, usernames, severity levels, and timestamps.</p>
+    <a href="{{ url_for('export_csv') }}" class="btn-sw btn-sw-primary">↓ Download CSV</a>
+  </div>
+
+  <div class="report-card">
+    <div class="report-icon">🚨</div>
+    <h3>Threat Alerts CSV</h3>
+    <p>Export all threat alerts with type, source IP, severity, resolution status, and triggered timestamps.</p>
+    <a href="{{ url_for('export_alerts_csv') }}" class="btn-sw btn-sw-primary">↓ Download CSV</a>
+  </div>
+
+  <div class="report-card">
+    <div class="report-icon">📋</div>
+    <h3>Daily Security Summary</h3>
+    <p>A snapshot of today's activity: login attempts, failed logins, new threats, and active alerts.</p>
+    <button class="btn-sw btn-sw-ghost" onclick="alert('PDF export requires an additional library. Export as CSV for now.')">↓ Download (Demo)</button>
+  </div>
+
+  <div class="report-card">
+    <div class="report-icon">🌍</div>
+    <h3>IP Intelligence Report</h3>
+    <p>Suspicious IP list with threat scores, countries, attack counts, and block status.</p>
+    <button class="btn-sw btn-sw-ghost" onclick="alert('Coming soon — export IP intelligence data.')">↓ Download (Soon)</button>
+  </div>
+</div>
+
+<div class="panel" style="margin-top:1.5rem;">
+  <div class="panel-header"><h2>Report Notes</h2></div>
+  <div class="panel-body">
+    <p style="color:var(--text-secondary);line-height:1.8;font-size:0.85rem;">
+      CSV exports include all records from the database. For large datasets, exports may take a few seconds.
+      All timestamps are in UTC. For incident response, combine the <em>Events CSV</em> and <em>Alerts CSV</em> for a
+      complete picture. PDF generation can be added using <code>ReportLab</code> or <code>WeasyPrint</code>.
+    </p>
+  </div>
+</div>
+
+{% endblock %}

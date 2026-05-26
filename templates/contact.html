@@ -1,0 +1,32 @@
+{% extends "base_public.html" %}
+{% block title %}Contact{% endblock %}
+{% block content %}
+<div style="padding-top:64px;">
+  <div class="contact-section" style="padding-top:5rem;">
+    <h1>Get in Touch</h1>
+    <p>Have questions about SecureWatch or want to contribute? Reach out below.</p>
+    <div class="settings-card">
+      <form>
+        <div class="form-field">
+          <label>Name</label>
+          <input type="text" placeholder="Your name">
+        </div>
+        <div class="form-field">
+          <label>Email</label>
+          <input type="email" placeholder="your@email.com">
+        </div>
+        <div class="form-field">
+          <label>Message</label>
+          <textarea rows="5" placeholder="Your message..."></textarea>
+        </div>
+        <button type="button" class="btn-sw btn-sw-primary" onclick="alert('Contact form is for demo purposes.')">Send Message</button>
+      </form>
+    </div>
+    <div class="settings-card" style="margin-top:1.25rem;">
+      <h3 style="margin-bottom:0.5rem;">GitHub</h3>
+      <p class="desc">SecureWatch is open-source and suitable for portfolio demonstrations.</p>
+      <p style="font-family:var(--font-mono);color:var(--accent-cyan);font-size:0.85rem;">github.com/yourname/securewatch</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

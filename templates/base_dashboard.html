@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Dashboard{% endblock %} — SecureWatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="overlay" id="overlay"></div>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <a href="{{ url_for('index') }}" class="sidebar-brand">
+      <div class="s-logo">🛡</div>
+      <div>
+        <div class="s-title">SecureWatch</div>
+        <div class="s-sub">Security Dashboard</div>
+      </div>
+    </a>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Main</div>
+      <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+        <span class="icon">⊞</span> Overview
+      </a>
+      <a href="{{ url_for('threats') }}" class="nav-item {% if request.endpoint == 'threats' %}active{% endif %}">
+        <span class="icon">⚠</span> Threat Alerts
+        {% set open_alerts = active_alerts_count %}
+        {% if open_alerts and open_alerts > 0 %}
+          <span class="badge-count">{{ open_alerts }}</span>
+        {% endif %}
+      </a>
+      <a href="{{ url_for('login_activity') }}" class="nav-item {% if request.endpoint == 'login_activity' %}active{% endif %}">
+        <span class="icon">↔</span> Login Activity
+      </a>
+      <a href="{{ url_for('suspicious_ips') }}" class="nav-item {% if request.endpoint == 'suspicious_ips' %}active{% endif %}">
+        <span class="icon">⊙</span> Suspicious IPs
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Tools</div>
+      <a href="{{ url_for('reports') }}" class="nav-item {% if request.endpoint == 'reports' %}active{% endif %}">
+        <span class="icon">↓</span> Reports
+      </a>
+      <a href="{{ url_for('settings') }}" class="nav-item {% if request.endpoint == 'settings' %}active{% endif %}">
+        <span class="icon">⚙</span> Settings
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">{{ session.username[0].upper() }}</div>
+        <div>
+          <div class="user-name">{{ session.username }}</div>
+          <div class="user-role">{{ session.role }}</div>
+        </div>
+      </div>
+      <a href="{{ url_for('logout') }}" class="logout-link">⏻ Sign out</a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <button class="hamburger" id="hamburger">☰</button>
+        <div class="topbar-left">
+          <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+          <div class="breadcrumb-bar">SecureWatch / {% block breadcrumb %}Overview{% endblock %}</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="status-pill"><span class="dot"></span> Monitoring Active</div>
+        <span style="color:var(--text-muted);font-size:0.78rem;" id="current-time"></span>
+      </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-container">
+          {% for category, message in messages %}
+            <div class="flash-msg flash-{{ category }}">
+              {% if category == 'success' %}✓{% elif category == 'danger' %}✕{% elif category == 'warning' %}⚠{% else %}ℹ{% endif %}
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="page-body fade-in">
+      {% block body %}{% endblock %}
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+  // Live clock
+  function tick() {
+    const el = document.getElementById('current-time');
+    if (el) el.textContent = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  }
+  tick(); setInterval(tick, 1000);
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

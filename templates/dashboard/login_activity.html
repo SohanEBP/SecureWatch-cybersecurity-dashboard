@@ -1,0 +1,93 @@
+{% extends "base_dashboard.html" %}
+{% set active_alerts_count = 0 %}
+{% block title %}Login Activity{% endblock %}
+{% block page_title %}Login Activity{% endblock %}
+{% block breadcrumb %}Login Activity{% endblock %}
+
+{% block body %}
+
+<div class="page-header">
+  <h1>Login Activity</h1>
+  <p>Complete log of all authentication attempts — successful and failed.</p>
+</div>
+
+<!-- Filters -->
+<form method="GET" class="filter-bar">
+  <input type="text" name="ip" class="filter-input" placeholder="Search by IP address…" value="{{ search_ip }}">
+  <input type="text" name="username" class="filter-input" placeholder="Search by username…" value="{{ search_user }}">
+  <select name="success" class="filter-select" onchange="this.form.submit()">
+    <option value="" {% if success_filter=='' %}selected{% endif %}>All Events</option>
+    <option value="1" {% if success_filter=='1' %}selected{% endif %}>✓ Successful</option>
+    <option value="0" {% if success_filter=='0' %}selected{% endif %}>✕ Failed</option>
+  </select>
+  <button type="submit" class="btn-sw btn-sw-primary">Search</button>
+  {% if search_ip or search_user or success_filter %}
+    <a href="{{ url_for('login_activity') }}" class="btn-sw btn-sw-ghost">✕ Clear</a>
+  {% endif %}
+  <span class="text-muted-sm" style="margin-left:auto;">{{ attempts.total }} record(s)</span>
+</form>
+
+<div class="panel">
+  <div class="panel-header"><h2>Authentication Log</h2></div>
+  <div class="sw-table-wrap">
+    <table class="sw-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Timestamp</th>
+          <th>IP Address</th>
+          <th>Username</th>
+          <th>Service</th>
+          <th>Hostname</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in attempts.items %}
+        <tr>
+          <td class="mono">{{ a.id }}</td>
+          <td class="mono">{{ a.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+          <td><span class="ip-pill">{{ a.ip_address }}</span></td>
+          <td class="primary">{{ a.username or '—' }}</td>
+          <td style="color:var(--text-muted);">{{ a.service }}</td>
+          <td style="color:var(--text-muted);">{{ a.hostname or '—' }}</td>
+          <td>
+            {% if a.success %}
+              <span class="badge-success">✓ Success</span>
+            {% else %}
+              <span class="badge-fail">✕ Failed</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--text-muted);">No login events found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Pagination -->
+{% if attempts.pages > 1 %}
+<div class="pagination-bar">
+  {% if attempts.has_prev %}
+    <a href="?page={{ attempts.prev_num }}&ip={{ search_ip }}&username={{ search_user }}&success={{ success_filter }}" class="page-btn">‹ Prev</a>
+  {% else %}
+    <span class="page-btn disabled">‹ Prev</span>
+  {% endif %}
+  {% for p in attempts.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+    {% if p %}
+      <a href="?page={{ p }}&ip={{ search_ip }}&username={{ search_user }}&success={{ success_filter }}" class="page-btn {% if p == attempts.page %}active{% endif %}">{{ p }}</a>
+    {% else %}
+      <span class="page-btn">…</span>
+    {% endif %}
+  {% endfor %}
+  {% if attempts.has_next %}
+    <a href="?page={{ attempts.next_num }}&ip={{ search_ip }}&username={{ search_user }}&success={{ success_filter }}" class="page-btn">Next ›</a>
+  {% else %}
+    <span class="page-btn disabled">Next ›</span>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}
