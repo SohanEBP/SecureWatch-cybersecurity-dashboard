@@ -188,7 +188,13 @@ CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
 - [ ] Log retention and archiving policies
 
 ---
+👨‍💻 Author
 
+Sohan Saha
+
+Computer Science Engineering (IoT & Cybersecurity) Heritage Institute of Technology
+
+---
 ## 📄 License
 
 MIT License — free to use for personal projects, portfolios, and internship demonstrations.
